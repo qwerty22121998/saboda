@@ -27,30 +27,14 @@
                 <jsp:include page="Content/sidebar.jsp"/>
                 <!-- /.col-lg-3 -->
 
-                <div class="col-lg-9 w">
+                <div class="col-lg-9">
 
                     <jsp:include page="Content/slide.jsp"/>
 
-                    <div class="row white">
-                       
-                        <c:forTokens items = "1,2,3,4" delims = "," var = "id">
-                            <div class="col-md-6 mb-4">
-                                <div class="card h-100">
-                                    <c:set var="field" value='${q.getFieldInfo(id)}'/>
-                                    <a href="book.jsp?id=${field.id}"><img class="card-img-top" src="images/san1.jpg" alt=""></a>
-                                    <div class="card-body">
-                                        <h4 class="card-title">
-                                            <a href="book.jsp?id=${field.id}">Sân ${field.id}</a>
-                                        </h4>
-
-                                        <p class="card-text">${field.desc}</p>
-                                    </div>
-                                    <div class="card-footer">
-                                        <h5>269k - 549k / giờ</h5>
-                                    </div>
-                                </div>
+                    <div class="row">
+                            <div class="col-md-12 mb-4 white">
+                                Liên hệ nhân viên quản lí để biết thêm về dịch vụ.  
                             </div>
-                        </c:forTokens>
                     </div>
                     <!-- /.row -->
 
@@ -66,7 +50,7 @@
         <!-- Footer -->
         <footer class="py-5 bg-green">
             <div class="container">
-                <p class="m-0 text-center text-white">Copyright &copy; Your Website 2017</p>
+                <p class="m-0 text-center text-white">Copyright &copy; SaBoDa 2018</p>
             </div>
             <!-- /.container -->
         </footer>
