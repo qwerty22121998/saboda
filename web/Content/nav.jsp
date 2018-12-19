@@ -30,12 +30,13 @@
                     <li class="nav-item">
                         <a class="nav-link" href="contact.jsp">Liên hệ</a>
                     </li>
+                    
                     <c:if test='${cookie.admin.value == "true"}'>
                     <li class="nav-item">
                         <a class="nav-link" href="admin?admin=false">Log out</a>
                     </li>
                     </c:if>
-                    <c:if test='${cookie.admin.value == "false"}'>
+                    <c:if test='${cookie.admin eq null ||  cookie.admin.value == "false"}'>
                     <li class="nav-item">
                         <a class="nav-link" href="admin?admin=true">Admin</a>
                     </li>

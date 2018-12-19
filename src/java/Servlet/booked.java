@@ -12,11 +12,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import entity.Book;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  *
@@ -60,10 +55,11 @@ public class booked extends HttpServlet {
             book.name = name;
             book.phone = phone;
             book.note = note;
-            book.from = date + " " + from + ":00";
-            book.to = date + " " + to + ":00";
+            book.from = Integer.parseInt(from);
+            book.to = to;
             book.status = false;
             book.price = price;
+            book.date = date;
             book.Place();
             response.sendRedirect("detail.jsp?id=" + book.id);
 

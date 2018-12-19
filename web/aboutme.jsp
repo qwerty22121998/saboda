@@ -32,11 +32,11 @@
                     <jsp:include page="Content/slide.jsp"/>
 
                     <div class="row">
-                       
-                            <div class="col-md-12 mb-4 white">
-                                Nhóm SaBoDa - Lớp SYB.M3
-                            </div>
-                       
+
+                        <div class="col-md-12 mb-4 white">
+                            Nhóm SaBoDa - Lớp SYB.M3
+                        </div>
+
                     </div>
                     <!-- /.row -->
 

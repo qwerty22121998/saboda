@@ -10,9 +10,10 @@ import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Time;
-import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -28,8 +29,9 @@ public class Book implements Serializable {
     public String phone;
     public String name;
     public boolean status;
-    public String from;
-    public String to;
+    public int from;
+    public int to;
+    public String date;
     public String price;
     public int id;
 
@@ -44,10 +46,11 @@ public class Book implements Serializable {
                 order.phone = rs.getString(3);
                 order.name = rs.getNString(4);
                 order.status = rs.getBoolean(5);
-                order.from = rs.getString(6);
-                order.to = rs.getString(7);
+                order.from = rs.getInt(6);
+                order.to = rs.getInt(7);
                 order.price = rs.getString(8);
                 order.id = rs.getInt(9);
+                order.date = rs.getString(10);
                 return order;
             }
             return null;
@@ -60,19 +63,19 @@ public class Book implements Serializable {
     public int Place() {
         int newID = new Random(new Date().getTime()).nextInt(9999) + 1;
         this.id = newID;
-        String query = "insert into [order] (id,fieldId, [from], name, note, phone, price, [status], [to])\n"
-                + "values (" + newID + ",?,?,N'" + name + "',?,?,?,?,?)";
+        String query = "insert into [order] (id,fieldId, [from], name, note, phone, price, [status], [to], date)\n"
+                + "values (" + newID + ",?,?,N'" + name + "',?,?,?,?,?,?)";
         System.out.println(query);
         try (Connection conn = new DBContext().getConnection()) {
             PreparedStatement ps = conn.prepareStatement(query);
             ps.setInt(1, fieldID);
-            ps.setString(2, from);
-//            ps.setNString(3, name);
+            ps.setInt(2, from);
             ps.setString(3, note);
             ps.setString(4, phone);
             ps.setString(5, price);
             ps.setBoolean(6, status);
-            ps.setString(7, to);
+            ps.setInt(7, to);
+            ps.setString(8, date);
             ps.executeUpdate();
             return newID;
 
@@ -81,14 +84,41 @@ public class Book implements Serializable {
         }
         return -1;
     }
-    
+
+    public static Map<String, ArrayList<Integer>> getFreeHours(String id) {
+        Map<String, ArrayList<Integer>> mp = new HashMap<>();
+
+        String query = "select [date],[from],[to] from [order] where status=1 and fieldId =" + id;
+        try (Connection conn = new DBContext().getConnection()) {
+            ResultSet rs = conn.prepareStatement(query).executeQuery();
+            while (rs.next()) {
+                String d = rs.getString(1);
+                int l = rs.getInt(2);
+                int h = rs.getInt(3);
+                System.out.println(d + " " + l + " " + h);
+                ArrayList<Integer> arr = new ArrayList<>();
+                if (mp.get(d) == null) {
+                    mp.put(d, new ArrayList<>());
+                }
+                mp.get(d).add(l);
+                mp.get(d).add(h);
+
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(Book.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            return mp;
+        }
+
+    }
+
     public static void Pay(String id) {
         String query = "update [order] set status = 1 where id=" + id;
         System.out.println(query);
         try (Connection conn = new DBContext().getConnection()) {
             conn.prepareStatement(query).executeUpdate();
         } catch (Exception e) {
-            
+
         }
     }
 
@@ -112,13 +142,12 @@ public class Book implements Serializable {
         return status;
     }
 
-
-    public String getFrom() {
+    public int getFrom() {
 
         return from;
     }
 
-    public String getTo() {
+    public int getTo() {
         return to;
     }
 

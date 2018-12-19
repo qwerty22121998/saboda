@@ -38,6 +38,7 @@
                             <h3>Bạn chọn đặt sân <span class="btn btn-info">${param.id}</span></h3>
 
                             <c:set var="field" value='${q.getFieldInfo(param.id)}'/>
+
                             <div class="row my-4 white">
 
                                 <div class="col-md-9">
@@ -64,32 +65,35 @@
                                     <div class="form-group row">
                                         <label for="date" class="col-sm-2 col-form-label">Ngày</label>
                                         <div class="col-sm-10">
-                                            <input onchange="check()" name="date" type="date" class="form-control" id="date" placeholder="">
+                                            <input onchange="checkDate()" name="date" type="date" class="form-control" id="date" placeholder="">
+                                            <div id="hour"></div>
                                         </div>
+
                                     </div>
                                     <div class="form-group row">
                                         <label for="from" class="col-sm-2 col-form-label">Từ giờ</label>
                                         <div class="col-sm-4">
-                                            <input onchange="check()" name="from" type="number" min="1" max="24" class="form-control" id="from" placeholder="Giờ bắt đầu">
+                                            <input onchange="checkDate()" name="from" type="number" min="1" max="24" class="form-control" id="from" placeholder="Giờ bắt đầu">
                                         </div>
                                         <label for="time" class="col-sm-2 col-form-label">Thời gian</label>
                                         <div class="col-sm-4">
-                                            <input onchange="check()" name="time" type="number" class="form-control" id="time" placeholder="Thời gian sử dụng">
+                                            <input onchange="checkDate()" name="time" type="number" class="form-control" id="time" placeholder="Thời gian sử dụng">
                                         </div>
                                     </div>
                                     <div class="form-group row">
                                         <label for="price" class="col-sm-2 col-form-label">Giá tiền</label>
                                         <div class="col-sm-10">
                                             <input onchange="check()" name="price" type="text" class="form-control" id="price"value="0" readonly>
+                                            <div id="warn"></div>
                                             <div>
                                                 <p>Lưu ý, chúng tôi tính tiền theo khung giờ</p>
                                                 <p>- Trước 18 giờ : 269k / tiếng
                                                 <p>- Từ 18 giờ đến 20 giờ: 549k / tiếng
                                                 <p>- Từ 20 giờ đến 22 giờ : 399k / tiếng
-                                                    
+
                                             </div>
                                         </div>
-                                        
+
                                     </div>
                                     <fieldset class="form-group">
                                         <div class="row">
@@ -167,41 +171,117 @@
             let time = $("#time")
             let submit = $("#submit")
             let price = $("#price")
+            let open = []
+
+            let z = new Date()
+            let tday = z.getFullYear() + '-' + (z.getMonth() - 1 + 2) + '-' + z.getDate()
+
+            let cdate = false;
+
+
+            let viewDate = () => {
+                let content = "<br>Khung giờ đã được đặt : <br>";
+                var cnt = 0
+                for (var i = 0; i < open.length; i++)
+                    if (open[i][0] === date[0].value) {
+                        content += "<font color='red'>" + open[i][1] + "h đến " + open[i][2] + "h</font><br>"
+                        cnt++
+                    }
+
+                if (cnt === 0) {
+                    content += "<font color='green'>Chưa có người đặt</font>"
+                }
+                $("#hour")[0].innerHTML = content;
+            }
 
             $(document).ready(() => {
-                date[0].valueAsDate = new Date();
+                date[0].value = tday
                 submit[0].style.backgroundColor = "red"
                 setInterval(() => {
                     check()
                 }, 100)
-            });
+                init()
+                viewDate();
 
+            });
+            let collision = (a, b, c, d) => {
+                if (b < c && b < d)
+                    return false
+                if (a > c && a > d)
+                    return false
+                return true
+            }
+
+            let init = () => {
+            <c:forEach var="k" items="${b.getFreeHours(param.id)}">
+                var now = ['${k.key}']
+                <c:forEach var="v" items="${k.value}" >
+
+                if (now.length === 3) {
+                    open.push(now)
+                    now = ['${k.key}']
+                }
+                now.push(${v})
+
+                </c:forEach>
+                open.push(now)
+
+            </c:forEach>
+            }
+
+            let checkDate = () => {
+
+                var now = date[0].value
+                var f = parseInt(from[0].value)
+                var t = parseInt(from[0].value) + parseInt(time[0].value)
+                $("#warn")[0].innerHTML = ""
+                if (f < 4 || t > 22 || f > t || now < tday) {
+                    $("#warn")[0].innerHTML = "<font color='red'>Khung giờ không hợp lệ</font>"
+                    return false
+                }
+                for (var i = 0; i < open.length; i++) {
+                    if (open[i][0] !== now)
+                        continue;
+                    if (collision(open[i][1], open[i][2], f, t)) {
+                        $("#warn")[0].innerHTML = "<font color='red'>Khung giờ đã có người chọn</font>"
+                        cdate = false
+                        return false;
+                    }
+                }
+                return true
+            }
 
             let check = () => {
                 submit[0].disabled = true
                 submit[0].style.backgroundColor = "red"
-                if (name[0].value.length === 0)
-                    return
-                if (name[0].value.length === 0 || isNaN(phone[0].value))
-                    return
                 if (date[0].value.length === 0)
-                    return
+                    return false
+                viewDate()
+                if (name[0].value.length === 0)
+                    return false
+                if (name[0].value.length === 0 || isNaN(phone[0].value))
+                    return false
+
                 if (from[0].value.length === 0)
-                    return
+                    return false
                 if (time[0].value.length === 0)
-                    return
-                
+                    return false
+                if (!checkDate())
+                    return false
                 let t = parseInt(from[0].value);
                 let s = 0
-                for(var i = 0; i < time[0].value; i++) {
-                    if (t + i < 18) s += 269;
-                    else if (t + i < 20) s+= 549
-                    else s += 399;
-                    
+                for (var i = 0; i < time[0].value; i++) {
+                    if (t + i < 18)
+                        s += 269;
+                    else if (t + i < 20)
+                        s += 549
+                    else
+                        s += 399;
                 }
                 price[0].value = s + "k vnd";
                 submit[0].disabled = false;
                 submit[0].style.backgroundColor = "#007bff"
+                return true
             }
         </script>   
 
